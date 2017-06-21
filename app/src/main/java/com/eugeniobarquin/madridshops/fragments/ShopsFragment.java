@@ -19,6 +19,7 @@ import com.eugeniobarquin.madridshops.views.OnElementClick;
 
 public class ShopsFragment extends Fragment {
 
+    private OnElementClick<Shop> listener;
 
     private RecyclerView shopsRecyclerView;
     private ShopsAdapter adapter;
@@ -52,8 +53,15 @@ public class ShopsFragment extends Fragment {
             @Override
             public void clikedOn(@NonNull Shop shop, int position) {
                 Log.d("Click", shop.getName());
+                if (listener != null) {
+                    ShopsFragment.this.listener.clikedOn(shop, position);
+                }
             }
         });
+    }
+
+    public void setOnElementClickListener(OnElementClick<Shop> listener) {
+        this.listener = listener;
     }
 
 }

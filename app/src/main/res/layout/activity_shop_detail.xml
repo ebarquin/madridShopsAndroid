@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="0dp"
+    android:paddingLeft="5dp"
+    android:paddingRight="5dp"
+    android:paddingTop="0dp"
+    tools:context="com.eugeniobarquin.madridshops.activities.ShopDetailActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/activity_shop_detail__shop_image"
+                tools:src ="@drawable/shop_icon"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"/>
+
+            <TextView
+                android:id="@+id/activity_shop_detail__shop_name"
+                tools:text="El Corte Chino (sin premio)"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:gravity="center_horizontal|bottom"
+                android:textColor="@android:color/white"
+                android:textSize="40sp"
+                android:background="@color/colorPrimaryDark"
+                android:alpha="0.8"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true"/>
+
+            <TextView
+                android:id="@+id/activity_shop_detail__shop_address"
+                android:layout_below="@id/activity_shop_detail__shop_name"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                tools:text="Address"/>
+
+            <TextView
+                android:id="@+id/activity_shop_detail__shop_description"
+                android:layout_below="@id/activity_shop_detail__shop_address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="Description"/>
+            <ImageView
+                android:id="@+id/activity_shop_detail__shop_map"
+                android:layout_below="@id/activity_shop_detail__shop_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:src="@drawable/map_placeholder"/>
+
+
+        </RelativeLayout>
+    </ScrollView>
+</RelativeLayout>

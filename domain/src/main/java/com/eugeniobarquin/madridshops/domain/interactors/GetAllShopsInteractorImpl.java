@@ -9,6 +9,8 @@ import com.eugeniobarquin.madridshops.domain.managers.network.GetAllShopsManager
 import com.eugeniobarquin.madridshops.domain.managers.network.ManagerErrorCompletion;
 import com.eugeniobarquin.madridshops.domain.managers.network.NetworkManager;
 import com.eugeniobarquin.madridshops.domain.managers.network.entities.ShopEntity;
+import com.eugeniobarquin.madridshops.domain.managers.network.mappers.ShopEntityIntoShopsMapper;
+import com.eugeniobarquin.madridshops.domain.model.Shops;
 
 import java.util.List;
 
@@ -21,7 +23,7 @@ public class GetAllShopsInteractorImpl implements GetAllShopsInteractor {
     }
 
     @Override
-    public void execute(@NonNull GetAllShopsInteractorCompletion completion, @Nullable InteractorErrorCompletion onError) {
+    public void execute(@NonNull final GetAllShopsInteractorCompletion completion, @Nullable final InteractorErrorCompletion onError) {
         if (this.networkManager == null) {
             if (onError == null) {
                 throw new IllegalStateException("Network manager can't be null");
@@ -34,12 +36,18 @@ public class GetAllShopsInteractorImpl implements GetAllShopsInteractor {
             @Override
             public void completion(@NonNull List<ShopEntity> shopsEntities) {
                 Log.d("SHOPS", shopsEntities.toString());
+                if (completion != null) {
+                    Shops shops = ShopEntityIntoShopsMapper.map(shopsEntities);
+                    completion.completion(shops);
+                }
 
             }
         }, new ManagerErrorCompletion() {
             @Override
             public void onError(String errorDescription) {
-
+                if (onError != null) {
+                    onError.OnError(errorDescription);
+                }
             }
         });
     }
