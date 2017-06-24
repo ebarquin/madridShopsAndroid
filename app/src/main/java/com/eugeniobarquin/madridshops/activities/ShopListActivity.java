@@ -7,14 +7,22 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 import com.eugeniobarquin.madridshops.R;
+import com.eugeniobarquin.madridshops.domain.interactors.GetAllShopsFromCacheInteractor;
+import com.eugeniobarquin.madridshops.domain.interactors.GetAllShopsFromCacheInteractorImpl;
 import com.eugeniobarquin.madridshops.domain.interactors.GetIfAllShopsAreCachedInteractor;
 import com.eugeniobarquin.madridshops.domain.interactors.GetIfAllShopsAreCachedInteractorImpl;
 import com.eugeniobarquin.madridshops.domain.interactors.GetAllShopsInteractor;
 import com.eugeniobarquin.madridshops.domain.interactors.GetAllShopsInteractorCompletion;
 import com.eugeniobarquin.madridshops.domain.interactors.GetAllShopsInteractorImpl;
 import com.eugeniobarquin.madridshops.domain.interactors.InteractorErrorCompletion;
+import com.eugeniobarquin.madridshops.domain.interactors.SaveAllShopsIntoCacheInteractor;
+import com.eugeniobarquin.madridshops.domain.interactors.SaveAllShopsIntoCacheInteractorImpl;
 import com.eugeniobarquin.madridshops.domain.interactors.SetAllShopsAreCachedInteractor;
 import com.eugeniobarquin.madridshops.domain.interactors.SetAllShopsAreCachedInteractorImpl;
+import com.eugeniobarquin.madridshops.domain.managers.cache.GetAllShopsFromCacheManager;
+import com.eugeniobarquin.madridshops.domain.managers.cache.GetAllShopsFromCacheManagerDAOImpl;
+import com.eugeniobarquin.madridshops.domain.managers.cache.SaveAllShopsIntoCacheManager;
+import com.eugeniobarquin.madridshops.domain.managers.cache.SaveAllShopsIntoCacheManagerDAOImpl;
 import com.eugeniobarquin.madridshops.domain.managers.network.GetAllShopsManagerImpl;
 import com.eugeniobarquin.madridshops.domain.managers.network.NetworkManager;
 import com.eugeniobarquin.madridshops.domain.model.Shop;
@@ -39,11 +47,12 @@ public class ShopListActivity extends AppCompatActivity {
 
         shopsFragment = (ShopsFragment) getSupportFragmentManager().findFragmentById(R.id.activity_shop_list__fragment_shops);
 
-        GetIfAllShopsAreCachedInteractor getAllShopsCachedInteractor = new GetIfAllShopsAreCachedInteractorImpl(this);
-        getAllShopsCachedInteractor.execute(new Runnable() {
+        GetIfAllShopsAreCachedInteractor getIfAllShopsAreCachedInteractor = new GetIfAllShopsAreCachedInteractorImpl(this);
+        getIfAllShopsAreCachedInteractor.execute(new Runnable() {
             @Override
             public void run() {
                 //all cached already, no need to download things, just read from DB
+                readDataFromCache();
             }
         }, new Runnable() {
             @Override
@@ -54,7 +63,19 @@ public class ShopListActivity extends AppCompatActivity {
             }
         });
 
+    }
 
+    private void readDataFromCache(){
+        GetAllShopsFromCacheManager getAllShopsFromCacheManager = new GetAllShopsFromCacheManagerDAOImpl(this);
+        GetAllShopsFromCacheInteractor getAllShopsFromCacheInteractor = new GetAllShopsFromCacheInteractorImpl(getAllShopsFromCacheManager);
+        getAllShopsFromCacheInteractor.execute(new GetAllShopsInteractorCompletion() {
+            @Override
+            public void completion(@NonNull Shops shops) {
+                configShopsFragment(shops);
+
+
+            }
+        });
 
     }
 
@@ -67,23 +88,23 @@ public class ShopListActivity extends AppCompatActivity {
         getAllShopsInteractor.execute(new GetAllShopsInteractorCompletion() {
             @Override
             public void completion(Shops shops) {
-                System.out.println("Hello hello");
 
-                progressBar.setVisibility(View.INVISIBLE);
-
-                //TODO: persist in cache all shops
-
-                SetAllShopsAreCachedInteractor setAllShopsCachedInteractor = new SetAllShopsAreCachedInteractorImpl(getBaseContext());
-                setAllShopsCachedInteractor.execute(true);
-
-                shopsFragment.setShops(shops);
-                shopsFragment.setOnElementClickListener(new OnElementClick<Shop>() {
+                SaveAllShopsIntoCacheManager saveManager = new SaveAllShopsIntoCacheManagerDAOImpl(getBaseContext());
+                SaveAllShopsIntoCacheInteractor saveInteractor = new SaveAllShopsIntoCacheInteractorImpl(saveManager);
+                saveInteractor.execute(shops, new Runnable() {
                     @Override
-                    public void clikedOn(@NonNull Shop element, int position) {
-                        //TODO: finish
-                        Navigator.navigateFromShopListAcivityToShopDetailActivity(ShopListActivity.this, element, position);
+                    public void run() {
+                        SetAllShopsAreCachedInteractor setAllShopsCachedInteractor = new SetAllShopsAreCachedInteractorImpl(getBaseContext());
+                        setAllShopsCachedInteractor.execute(true);
+
                     }
                 });
+
+
+                configShopsFragment(shops);
+                progressBar.setVisibility(View.INVISIBLE);
+
+
             }
         }, new InteractorErrorCompletion() {
             @Override
@@ -92,5 +113,17 @@ public class ShopListActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void configShopsFragment(final Shops shops) {
+        shopsFragment.setShops(shops);
+        shopsFragment.setOnElementClickListener(new OnElementClick<Shop>() {
+            @Override
+            public void clikedOn(@NonNull Shop element, int position) {
+                //TODO: finish
+                Navigator.navigateFromShopListAcivityToShopDetailActivity(ShopListActivity.this, element, position);
+            }
+        });
+
     }
 }

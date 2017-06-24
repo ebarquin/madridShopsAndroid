@@ -10,6 +10,12 @@ import android.widget.Button;
 
 import com.eugeniobarquin.madridshops.MadridShopsApp;
 import com.eugeniobarquin.madridshops.R;
+import com.eugeniobarquin.madridshops.domain.interactors.ClearCacheInteractor;
+import com.eugeniobarquin.madridshops.domain.interactors.ClearCacheInteractorImpl;
+import com.eugeniobarquin.madridshops.domain.interactors.SetAllShopsAreCachedInteractor;
+import com.eugeniobarquin.madridshops.domain.interactors.SetAllShopsAreCachedInteractorImpl;
+import com.eugeniobarquin.madridshops.domain.managers.cache.ClearCacheManager;
+import com.eugeniobarquin.madridshops.domain.managers.cache.ClearCacheManagerDAOImpl;
 import com.eugeniobarquin.madridshops.navigator.Navigator;
 import com.eugeniobarquin.madridshops.util.MainThread;
 
@@ -23,6 +29,7 @@ import java.net.URL;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -125,5 +132,19 @@ public class MainActivity extends AppCompatActivity {
             out.append(line);
         br.close();
         return out.toString();
+    }
+
+    @OnClick(R.id.activity_main__clear__cache_button) void clearCache() {
+        final ClearCacheManager clearCacheManager = new ClearCacheManagerDAOImpl(this);
+            ClearCacheInteractor clearCacheInteractor = new ClearCacheInteractorImpl(clearCacheManager);
+
+            clearCacheInteractor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    SetAllShopsAreCachedInteractor setAllShopsAreCachedInteractor = new SetAllShopsAreCachedInteractorImpl(getBaseContext());
+                    setAllShopsAreCachedInteractor.execute(false);
+                }
+            });
+
     }
 }
